@@ -1,0 +1,38 @@
+/*
+	Junyoung Kwon
+	861274236
+
+	Task 1
+
+*/
+
+
+
+NUMBER	[0-9]*
+	int numInt = 0;
+	int numOps = 0;
+	int numParen = 0;
+	int numEq = 0;
+%%
+
+{NUMBER}	{printf("NUMBER %s ", yytext); ++numInt;}	
+
+"+"		{printf("PLUS "); ++numOps;}
+"-"		{printf("MINUS "); ++numOps;}
+"*"		{printf("MULT "); ++numOps;}
+"/"		{printf("DIV "); ++numOps;}
+"("		{printf("L_PAREN "); ++numParen;}
+")"		{printf("R_PAREN "); ++numParen;}
+"="		{printf("EQUAL "); ++numEq;}
+
+.		{printf("ERROR: UNRECOGNIZED CHARACTER\n"); exit(0);}
+%%
+
+int main()
+{
+	yylex();
+	printf("Number of integers: %d\n", numInt);
+	printf("Number of operators: %d\n", numOps);
+	printf("Number of parentheses: %d\n", numParen);
+	printf("Number of equal signs: %d\n", numEq);
+}
