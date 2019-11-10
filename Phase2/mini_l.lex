@@ -5,79 +5,82 @@
 	Phase 2
 */
 
+%{
+	#include "y.tab.h"
+	int numLines = 1, idenIndex = 1;
+
+%}
+
 LETTER [a-zA-Z]
 NUMBER [0-9] 
-IDENTIFIER {LETTER}|({LETTER}({LETTER}|{NUMBER}|_)*({LETTER}|{NUMBER}))
+IDENTIFIER {LETTER}|({LETTER}({LETTER}|{NUMBER}|_)*({LETTER}|{NUMBER})*)
 NOIDENTBEF ({NUMBER}|_){IDENTIFIER}
 NOIDENTAFT {IDENTIFIER}_
-FILE [{LETTER}{NUMBER}]*\.min
 
-	int numLines = 1, idenIndex = 1;
 %%
 
  /*Reserved Word*/
 
-"function"	{printf("FUNCTION\n"); idenIndex += yyleng;}
-"beginparams"	{printf("BEGIN_PARAMS\n"); idenIndex += yyleng;}
-"endparams"	{printf("END_PARAMS\n"); idenIndex += yyleng;}
-"beginlocals"	{printf("BEGIN_LOCALS\n"); idenIndex += yyleng;}
-"endlocals"	{printf("END_LOCALS\n"); idenIndex += yyleng;}
-"beginbody"	{printf("BEGIN_BODY\n"); idenIndex += yyleng;}
-"endbody"	{printf("END_BODY\n"); idenIndex += yyleng;}
-"integer"	{printf("INTEGER\n"); idenIndex += yyleng;}
-"array"		{printf("ARRAY\n"); idenIndex += yyleng;}
-"of"		{printf("OF\n"); idenIndex += yyleng;}
-"if"		{printf("IF\n"); idenIndex += yyleng;}
-"then"		{printf("THEN\n"); idenIndex += yyleng;}
-"endif"		{printf("ENDIF\n"); idenIndex += yyleng;}
-"else"		{printf("ELSE\n"); idenIndex += yyleng;}
-"while"		{printf("WHILE\n"); idenIndex += yyleng;}
-"do"		{printf("DO\n"); idenIndex += yyleng;}
-"beginloop"	{printf("BEGINLOOP\n"); idenIndex += yyleng;}
-"endloop"	{printf("ENDLOOP\n"); idenIndex += yyleng;}
-"continue"	{printf("CONTINUE\n"); idenIndex += yyleng;}
-"read"		{printf("READ\n"); idenIndex += yyleng;}
-"write"		{printf("WRITE\n"); idenIndex += yyleng;}
-"and"		{printf("AND\n"); idenIndex += yyleng;}
-"or"		{printf("OR\n"); idenIndex += yyleng;}
-"not"		{printf("NOT\n"); idenIndex += yyleng;}
-"true"		{printf("TRUE\n"); idenIndex += yyleng;}
-"false"		{printf("FALSE\n"); idenIndex += yyleng;}
-"return"	{printf("RETURN\n"); idenIndex += yyleng;}
+"function"	{ idenIndex += yyleng; return FUNC;}
+"beginparams"	{ idenIndex += yyleng; return BEG_PARAMS;}
+"endparams"	{ idenIndex += yyleng; return END_PARAMS;}
+"beginlocals"	{ idenIndex += yyleng; return BEG_LOC;}
+"endlocals"	{ idenIndex += yyleng; return END_LOC;}
+"beginbody"	{ idenIndex += yyleng; return BEG_BOD;}
+"endbody"	{ idenIndex += yyleng; return END_BOD;}
+"integer"	{ idenIndex += yyleng; return INT;}
+"array"		{ idenIndex += yyleng; return ARR;}
+"of"		{ idenIndex += yyleng; return OF;}
+"if"		{ idenIndex += yyleng; return IF;}
+"then"		{ idenIndex += yyleng; return THEN;}
+"endif"		{ idenIndex += yyleng; return END_IF;}
+"else"		{ idenIndex += yyleng; return ELSE;}
+"while"		{ idenIndex += yyleng; return WHILE;}
+"do"		{ idenIndex += yyleng; return DO;}
+"beginloop"	{ idenIndex += yyleng; return BEG_LOOP;}
+"endloop"	{ idenIndex += yyleng; return END_LOOP;}
+"continue"	{ idenIndex += yyleng; return CONT;}
+"read"		{ idenIndex += yyleng; return READ;}
+"write"		{ idenIndex += yyleng; return WRITE;}
+"and"		{ idenIndex += yyleng; return AND;}
+"or"		{ idenIndex += yyleng; return OR;}
+"not"		{ idenIndex += yyleng; return NOT;}
+"true"		{ idenIndex += yyleng; return TRUE;}
+"false"		{ idenIndex += yyleng; return FALSE;}
+"return"	{ idenIndex += yyleng; return RETURN;}
 
  /*Arithmetic Operators*/
 
-"-"		{printf("SUB\n"); idenIndex += yyleng;}
-"+"		{printf("ADD\n"); idenIndex += yyleng;}
-"*"		{printf("MULT\n"); idenIndex += yyleng;}
-"/"		{printf("DIV\n"); idenIndex += yyleng;}
-"%"		{printf("MOD\n"); idenIndex += yyleng;}
+"-"		{ idenIndex += yyleng; return MINUS;}
+"+"		{ idenIndex += yyleng; return PLUS;}
+"*"		{ idenIndex += yyleng; return MULT;}
+"/"		{ idenIndex += yyleng; return DIV;}
+"%"		{ idenIndex += yyleng; return MOD;}
 
  /*Comparison Operators*/
 
-"=="		{printf("EQ\n"); idenIndex += yyleng;}
-"<>"		{printf("NEQ\n");idenIndex += yyleng;}
-"<"		{printf("LT\n"); idenIndex += yyleng;}
-">"		{printf("GT\n"); idenIndex += yyleng;}
-"<="		{printf("LTE\n"); idenIndex += yyleng;}
-">="		{printf("GTE\n"); idenIndex += yyleng;}
+"=="		{ idenIndex += yyleng; return EQ;}
+"<>"		{ idenIndex += yyleng; return NEQ;}
+"<"		{ idenIndex += yyleng; return LT;}
+">"		{ idenIndex += yyleng; return GT;}
+"<="		{ idenIndex += yyleng; return LTE;}
+">="		{ idenIndex += yyleng; return GTE;}
 
  /*Identifiers and Numbers*/
 
-{IDENTIFIER}	{printf("IDENT %s\n", yytext); idenIndex += yyleng;}
-{NUMBER}*	{printf("NUMBER %s\n", yytext); idenIndex += yyleng;}
-{FILE}		{printf("FILE: %s\n", yytext); yyin = fopen(yytext, "r");}
+{IDENTIFIER}	{ idenIndex += yyleng; yylval.sval = yytext; return IDENT; }
+{NUMBER}*	{ idenIndex += yyleng; return NUMBER;}
 
  /*Other Special Symbols*/
 
-";"		{printf("SEMICOLON\n"); idenIndex += yyleng;}
-":"		{printf("COLON\n"); idenIndex += yyleng;}
-","		{printf("COMMA\n"); idenIndex += yyleng;}
-"("		{printf("L_PAREN\n"); idenIndex += yyleng;}
-")"		{printf("R_PAREN\n"); idenIndex += yyleng;}
-"["		{printf("L_SQUARE_BRACKET\n"); idenIndex += yyleng;}
-"]"		{printf("R_SQUARE_BRACKET\n"); idenIndex += yyleng;}
-":="		{printf("ASSIGN\n"); idenIndex += yyleng;}
+";"		{ idenIndex += yyleng; return SEMICOLON;}
+":"		{ idenIndex += yyleng; return COLON;}
+","		{ idenIndex += yyleng; return COMMA;}
+"("		{ idenIndex += yyleng; return L_PAREN;}
+")"		{ idenIndex += yyleng; return R_PAREN;}
+"["		{ idenIndex += yyleng; return BEG_ARR;}
+"]"		{ idenIndex += yyleng; return END_ARR;}
+":="		{ idenIndex += yyleng; return ASSIGN;}
 "\n"		{++numLines; idenIndex = 1;}
 [\t]+		{idenIndex += yyleng;}
 [ ]		{idenIndex += yyleng;}
@@ -89,14 +92,3 @@ FILE [{LETTER}{NUMBER}]*\.min
 .		{printf("Error at line %d, column %d: unrecognized symbol \"%s\"\n", numLines, idenIndex, yytext); ++numLines; idenIndex += yyleng; exit(0);}
 %%
 
-int main(/*int argc, char* argv[]*/)
-{
-	/*if(argc == 2)
-	{
-		yyin=fopen(argv[1], "r");
-	}else{
-		yyin=stdin;
-	}*/
-
-	yylex();	
-}
