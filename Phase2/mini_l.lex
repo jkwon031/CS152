@@ -69,7 +69,7 @@ NOIDENTAFT {IDENTIFIER}_
  /*Identifiers and Numbers*/
 
 {IDENTIFIER}	{ idenIndex += yyleng; yylval.sval = yytext; return IDENT; }
-{NUMBER}*	{ idenIndex += yyleng; return NUMBER;}
+{NUMBER}*	{ idenIndex += yyleng; yylval.ival = atoi(yytext); return NUMBER;}
 
  /*Other Special Symbols*/
 
@@ -89,6 +89,6 @@ NOIDENTAFT {IDENTIFIER}_
  /*Errror*/
 {NOIDENTBEF}	{idenIndex += yyleng; printf("Error at line %d and column %d: identifier \"%s\" must begin with a letter\n", numLines, idenIndex - 1, yytext); exit(0);}
 {NOIDENTAFT}	{idenIndex += yyleng; printf("Error at line %d and column %d: identifier \"%s\" cannot end with an underscore\n", numLines, idenIndex - 1, yytext); exit(0);}
-.		{printf("Error at line %d, column %d: unrecognized symbol \"%s\"\n", numLines, idenIndex, yytext); ++numLines; idenIndex += yyleng; exit(0);}
+.		{ printf("Error at line %d, column %d: unrecognized symbol \"%s\"\n", numLines, idenIndex, yytext); ++numLines; idenIndex += yyleng; }
 %%
 

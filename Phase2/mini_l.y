@@ -12,6 +12,7 @@
 
 %union{
   double dval;
+  int ival;
   char* sval;
 }
 
@@ -21,7 +22,7 @@
 %token MINUS PLUS MULT DIV MOD
 %token EQ NEQ LT GT LTE GTE
 %token SEMICOLON COLON COMMA L_PAREN R_PAREN BEG_ARR END_ARR ASSIGN
-%token <dval> NUMBER
+%token <ival> NUMBER
 %token <sval> IDENT
 %left PLUS MINUS
 %left MULT DIV MOD
@@ -104,18 +105,18 @@ if_stmt:		IF bool_exp THEN p_statement SEMICOLON else_stmt END_IF
 				;
 
 else_stmt:							{ printf("else_stmt -> epsilon\n"); }
-				| ELSE statement SEMICOLON
+				| ELSE p_statement SEMICOLON
 									{ printf("else_stmt -> ELSE p_statement SEMICOLON\n"); }
 				|
 				;
 
 while_stmt:		WHILE bool_exp BEG_LOOP p_statement SEMICOLON END_LOOP
-									{ printf("while_stmt -> WHILE bool_exp BEG_LOOP statment SEMICOLON END_LOOP\n"); }
+									{ printf("while_stmt -> WHILE bool_exp BEG_LOOP p_statment SEMICOLON END_LOOP\n"); }
 				|
 				;
 
 do_while_stmt:	DO BEG_LOOP p_statement SEMICOLON END_LOOP WHILE bool_exp
-									{ printf("do_while_stmt -> DO BEG_LOOP statement SEMICOLON END_LOOP WHILE bool_exp\n"); }
+									{ printf("do_while_stmt -> DO BEG_LOOP p_statement SEMICOLON END_LOOP WHILE bool_exp\n"); }
 				|
 				;
 
@@ -131,7 +132,7 @@ cont_stmt:		CONT 				{ printf("cont_stmt -> CONT\n"); }
 				|
 				;
 
-return_stmt:	RETURN 				{ printf("return_stmt -> RETURN\n"); }
+return_stmt:	RETURN exp				{ printf("return_stmt -> RETURN exp\n"); }
 				|
 				;
 
