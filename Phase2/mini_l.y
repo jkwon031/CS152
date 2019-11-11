@@ -100,16 +100,16 @@ if_stmt:		IF bool_exp THEN p_statement else_stmt END_IF
 				;
 
 else_stmt:							{ printf("else_stmt -> epsilon\n"); }
-				| ELSE p_statement SEMICOLON
-									{ printf("else_stmt -> ELSE p_statement SEMICOLON\n"); }
+				| ELSE p_statement
+									{ printf("else_stmt -> ELSE p_statement\n"); }
 				;
 
-while_stmt:		WHILE bool_exp BEG_LOOP p_statement SEMICOLON END_LOOP
-									{ printf("while_stmt -> WHILE bool_exp BEG_LOOP p_statment SEMICOLON END_LOOP\n"); }
+while_stmt:		WHILE bool_exp BEG_LOOP p_statement END_LOOP
+									{ printf("while_stmt -> WHILE bool_exp BEG_LOOP p_statment END_LOOP\n"); }
 				;
 
-do_while_stmt:	DO BEG_LOOP p_statement SEMICOLON END_LOOP WHILE bool_exp
-									{ printf("do_while_stmt -> DO BEG_LOOP p_statement SEMICOLON END_LOOP WHILE bool_exp\n"); }
+do_while_stmt:	DO BEG_LOOP p_statement END_LOOP WHILE bool_exp
+									{ printf("do_while_stmt -> DO BEG_LOOP p_statement END_LOOP WHILE bool_exp\n"); }
 				;
 
 read_stmt:		READ c_var			{ printf("read_stmt -> READ c_var\n"); }
