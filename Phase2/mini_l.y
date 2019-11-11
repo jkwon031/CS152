@@ -95,8 +95,8 @@ statement:		assign_stmt		{ printf("statement -> var ASSIGN exp\n"); }
 assign_stmt:	var ASSIGN exp 		{ printf("assign_stmt -> var ASSIGN exp\n"); }
 				;					
 
-if_stmt:		IF bool_exp THEN p_statement SEMICOLON else_stmt END_IF
-									{ printf("if_stmt -> IF bool_exp THEN statment SEMICOLON else_stmt END_IF\n"); }
+if_stmt:		IF bool_exp THEN p_statement else_stmt END_IF
+									{ printf("if_stmt -> IF bool_exp THEN p_statment else_stmt END_IF\n"); }
 				;
 
 else_stmt:							{ printf("else_stmt -> epsilon\n"); }
