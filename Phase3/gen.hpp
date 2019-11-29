@@ -113,6 +113,8 @@ class StatementList : public ASTNode
     }
     void append(Statement *s) { stat_vec.push_back(s); }
 
+    void front(Statement *s) { stat_vec.insert(s); }
+
     virtual std::string gencode() {
         std::stringstream ss;
         for (auto s : stat_vec) {
