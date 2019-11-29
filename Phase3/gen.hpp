@@ -125,6 +125,19 @@ class StatementList : public ASTNode
     std::vector<Statement *> stat_vec;
 };
 
+class WhileStatement : public Statement
+{
+  public:
+    WhileStatement(Expr *bool_expr, StatementList *while_block)
+	: bool_expr(bool_expr), while_block(while_block) {}
+
+    virtual std::string gencode() {
+	std::stringstream ss;
+	ss << bool_expr->gencode();
+	std::string 
+    }
+};
+
 class IfElseStatement : public Statement
 {
   public:
