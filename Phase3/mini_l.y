@@ -33,16 +33,19 @@
 
 
 %% 
-program:			functions		{$$ = $1; root = $$/* printf("program -> epsilon\n");*/ }
-				| function program	{$$ = $2; root = $$;/* printf("prog_start -> function\n");*/ }
+program:			functions		{ $$ = $1; root = $$/* printf("program -> epsilon\n");*/ }
+				;
+
+functions:			function 			{ $$ = new FunctionsList(); $$->append($1); /* printf("prog_start -> function\n");*/ }
+				|	function functions	{ $$ = $2; $2->front($1); }
 				;
 
 function:		FUNC ident SEMICOLON params local body
-									{/* printf("function -> FUNC IDENT SEMICOLON params local body\n");*/ }
+							{ $$ = new Function($2, $4, $5, $6); /* printf("function -> FUNC IDENT SEMICOLON params local body\n");*/ }
 				;
 
 params:			BEG_PARAMS declarations END_PARAMS
-									{/* printf("params -> BEG_PARAMS declarations END_PARAMS\n");*/ }
+							{/* printf("params -> BEG_PARAMS declarations END_PARAMS\n");*/ }
 				;
 
 local:			BEG_LOC declarations END_LOC
@@ -55,7 +58,7 @@ body:			BEG_BOD s_statement END_BOD
 
 declarations:						{/* printf("declarations -> epsilon\n");*/ }
 				|	declaration SEMICOLON declarations
-									{ /*printf("declarations -> declaration SEMICOLON declarations\n");*/ }
+							{ $$ = new DeclarationsList(); $$->append(/*printf("declarations -> declaration SEMICOLON declarations\n");*/ }
 				;
 
 declaration: 	d_ident COLON array INT
