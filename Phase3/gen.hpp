@@ -127,17 +127,37 @@ class StatementList : public ASTNode
     std::vector<Statement *> stat_vec;
 };
 
-class WhileStatement : public Statement
+class Loops : public Statement
+{
+};
+
+class WhileStatement : public Loops
 {
   public:
-    WhileStatement(Expr *bool_expr, StatementList *while_block)
-	: bool_expr(bool_expr), while_block(while_block) {}
+  	WhileStatement(Expr *bool_expr, StatementList *then_block)
+  	: bool_expr(bool_expr), then_block(then_block) {}
 
-    virtual std::string gencode() {
-	std::stringstream ss;
-	ss << bool_expr->gencode();
-	std::string 
-    }
+  	virtual std:string gencode() {
+  		std::stringstream ss;
+  		std::string l0, l1, l2;
+  		l0 = Generator::make_label();
+  		l1 = Generator::make_label();
+  		l2 = Generator::make_lable();
+
+  		ss << ": " << l2 << '\n';
+  		ss << bool_expr->gencode();
+  		ss << "?:= " << l0 << ", " << bool_expr->ret_var << '\n';
+  		ss << ":= " << l1 << '\n';
+  		ss << ": " << l0 << '\n';
+  		ss << then_block->gencode();
+  		ss << ":= " << l2 << '\n';
+  		ss << ": " << l1 << '\n';
+  		return ss.str();
+  	}
+
+  protected:
+  	Expr *bool_expr;
+  	StatementList *then_block;
 };
 
 class IfElseStatement : public Statement
