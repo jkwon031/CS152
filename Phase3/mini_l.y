@@ -80,7 +80,7 @@ array:								{/* printf("array -> epsilon\n");*/ }
 				;
 
 s_statement:							{/* printf("s_statment -> epsilon\n"); */}
-				|	p_statement		{/* printf("s_statement -> p_statament\n");*/ }
+				|	p_statement		{ $$ = $1; }
 				;
 
 p_statement:		statement SEMICOLON	{/* printf("p_statement -> statement SEMICOLON\n");*/ }
@@ -89,9 +89,9 @@ p_statement:		statement SEMICOLON	{/* printf("p_statement -> statement SEMICOLON
 				;
 
 statement:		assign_stmt		{/* printf("statement -> var ASSIGN exp\n"); */}
-				|	if_stmt			{/* printf("statement -> if_stmt\n");*/ }
-				|	while_stmt		{/* printf("statement -> while_stmt\n");*/ }
-				|	do_while_stmt	{/* printf("statement -> do_while_stmt\n");*/ }
+				|	if_stmt			{ $$ = $1; }
+				|	while_stmt		{ $$ = $1; }
+				|	do_while_stmt	{ $$ = $1; }
 				|	read_stmt		{/* printf("statement -> read_stmt\n");*/ }
 				|	write_stmt		{/* printf("statement -> write_stmt\n"); */}
 				|	cont_stmt		{/* printf("statment -> cont_stmt\n"); */}
@@ -101,21 +101,18 @@ statement:		assign_stmt		{/* printf("statement -> var ASSIGN exp\n"); */}
 assign_stmt:	var ASSIGN exp 		{/* printf("assign_stmt -> var ASSIGN exp\n");*/ }
 				;					
 
-if_stmt:		IF bool_exp THEN p_statement else_stmt END_IF
-									{/* printf("if_stmt -> IF bool_exp THEN p_statment else_stmt END_IF\n"); */}
-				;
-
-else_stmt:							{ /*printf("else_stmt -> epsilon\n");*/ }
-				| ELSE p_statement
-									{/* printf("else_stmt -> ELSE p_statement\n");*/ }
+if_stmt:		IF bool_exp THEN p_statement END_IF 
+									{ $$ = new IfStatement($2, $4); }
+				|	IF bool_exp THEN p_statement ELSE p_statement END_IF
+									{ $$ = new IfElseStatement($2, $4, $6); }
 				;
 
 while_stmt:		WHILE bool_exp BEG_LOOP p_statement END_LOOP
-									{/* printf("while_stmt -> WHILE bool_exp BEG_LOOP p_statment END_LOOP\n"); */}
+									{ $$ = new WhileStatement($2, $4); }
 				;
 
 do_while_stmt:	DO BEG_LOOP p_statement END_LOOP WHILE bool_exp
-									{/* printf("do_while_stmt -> DO BEG_LOOP p_statement END_LOOP WHILE bool_exp\n"); */}
+									{ $$ = new DoWhileStatement($2, $5); }
 				;
 
 read_stmt:		READ c_var			{/* printf("read_stmt -> READ c_var\n");*/ }

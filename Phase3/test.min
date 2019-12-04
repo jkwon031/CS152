@@ -1,0 +1,20 @@
+function main;
+beginparams
+endparams
+
+beginlocals
+	
+	n : integer;
+
+endlocals
+
+beginbody
+
+	n := 1;
+
+	do
+		beginloop
+			n := n + 1;
+		endloop
+	while n < 4;
+endbody

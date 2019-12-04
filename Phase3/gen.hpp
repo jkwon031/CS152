@@ -127,15 +127,11 @@ class StatementList : public ASTNode
     std::vector<Statement *> stat_vec;
 };
 
-class Loops : public Statement
-{
-};
-
-class WhileStatement : public Loops
+class WhileStatement : public Statement
 {
   public:
-  	WhileStatement(Expr *bool_expr, StatementList *then_block)
-  	: bool_expr(bool_expr), then_block(then_block) {}
+  	WhileStatement(Expr *bool_expr, StatementList *while_block)
+  	: bool_expr(bool_expr), while_block(while_block) {}
 
   	virtual std:string gencode() {
   		std::stringstream ss;
@@ -149,8 +145,57 @@ class WhileStatement : public Loops
   		ss << "?:= " << l0 << ", " << bool_expr->ret_var << '\n';
   		ss << ":= " << l1 << '\n';
   		ss << ": " << l0 << '\n';
-  		ss << then_block->gencode();
+  		ss << while_block->gencode();
   		ss << ":= " << l2 << '\n';
+  		ss << ": " << l1 << '\n';
+  		return ss.str();
+  	}
+
+  protected:
+  	Expr *bool_expr;
+  	StatementList *while_block;
+};
+
+class DoWhileStatement : public Statement
+{
+  public:
+  	DoWhileStatement(StatementList *dowhile_block, Expr *bool_expr)
+  	: dowhile_block(dowhile_block), bool_expr(bool_expr) {}
+
+  	virtual std:string gencode() {
+  		std::stringstream ss;
+  		std::string l0;
+  		l0 = Generator::make_label();
+
+  		ss << ": " << l0 << '\n';
+  		ss << dowhile_block->gencode();
+  		ss << bool_expr->gencode();
+  		ss << "?:= " << l0 << '\n';
+  		return ss.str();
+  	}
+
+  protected:
+  	Expr *bool_expr;
+  	StatementList *dowhile_block;
+};
+
+class IfStatement : public Statement
+{
+  public:
+  	IfStatement(Expr *bool_expr, StatementList *then_block)
+  	: bool_expr(bool_expr), then_block(then_block) {}
+
+  	virtual std:string gencode() {
+  		std::stringstream ss;
+  		std::string l0, l1;
+  		l0 = Generator::make_label
+  		l1 = Generator::make_label
+
+  		ss << bool_expr->gencode();
+  		ss << "?:= " << l0 << ", " << bool_expr->ret_var << '\n';
+  		ss << ":= " << l1 << '\n';
+  		ss << ": " << l0 << '\n';
+  		ss << then_block->gencode();
   		ss << ": " << l1 << '\n';
   		return ss.str();
   	}
