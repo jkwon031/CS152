@@ -37,6 +37,94 @@ class ASTNode
     virtual std::string gencode() = 0;
 };
 
+class Variable : public ASTNode
+{
+
+};
+
+class Varlist : public ASTnode
+{
+public:
+	VarList(){}
+	virtual ~Varlist()
+	{
+		for(auto v : var_vec){
+			delete v;
+		}
+	}
+	void append(Variable *v) {var_vec.push_back(v);}
+
+	virtual std::string gencode() {
+		std::stringstream ss;
+		for(auto v : var_vec) {
+			ss << v->gencode();
+		}
+		return ss.str();
+	}
+
+protected:
+	std::vector<Variable *> var_vec;
+
+}
+
+class Var_Id : public Variable
+{
+public:
+	Var_Id(std::string name) : name(name){}
+
+	virtual std::string gencode()
+	{
+		ret_var = name;
+		return "";
+	}
+
+protected:
+	std::string name;
+}
+
+class Var_Arr : public Variable
+{
+public:
+	Var_Arr(std::string name, Expr* exprIndex) : name(name), index(index) {}
+
+	virtual std::string gencode()
+	{
+		std::string temp = Generator::make_var();
+		ret_var = name + ", " + temp;
+		std::stringstream ss;
+		ss << exprIndex->gencode();
+		return ss.str();
+	}
+
+protected:
+	std::string name;
+	Expr* index;
+}
+
+class Function : public ASTNode
+{
+public:
+	Function(Var_Id func, ExprList * f_param) : func(func), f_param(f_param){}
+	virtual std::string gencode(){
+		std::stringstream ss;
+		std::string temp = Generator::make_var();
+		f_param->gencode();
+		for(f_p : f_param->expr_list){
+			ss << "param " << f_p->ret_var << "\n";
+		}
+		ss << "call " << func->ret_var << ", " << temp < "\n";
+		ret_var = temp;
+		return ss.str();
+	}
+
+protected:
+	Function(){}
+	Var_Id func;
+	ExprList *f_param;
+}; 
+
+
+
 class Expr : public ASTNode
 {
   public:
@@ -64,6 +152,28 @@ class Expr : public ASTNode
     Expr *p1 = nullptr, *p2 = nullptr;
     std::string op;
 };
+
+class ExprList : Expr
+{
+public:
+	ExprList(){}
+	virtual ~ExprList()
+	{
+		for(auto e : expr_list) {delete e;}
+	}
+	void append(Expr *e) {expr_list.push_back(e);}
+	virtual std::string gencode()
+	{
+		std::stringstream ss;
+		for(auto e: expr_list){
+			ss << e->gencode();
+		}
+		return ss.str();
+	}
+protected:
+	std::vector<Expr *> expr_list;
+
+}
 
 class ExprID : public Expr
 {
@@ -96,9 +206,27 @@ class ExprNumber : public Expr
     int number;
 };
 
-class Statement : public ASTNode
+class ExprArray : public Expr
 {
+public:
+	ExprArray(Var_Arr* arr) : arr(arr) {}
+
+	virtual std::string gencode()
+	{
+		std::string temp = Generator::make_var();
+		ret_var = temp;
+		std::stringstream ss;
+		ss << "=[]" << temp << ", " << arr->ret_var << '\n';
+		return ss.str();
+	}
+
+protected:
+	Var_Arr* arr;
+
 };
+
+class Statement : public ASTNode
+{};
 
 class StatementList : public ASTNode
 {
@@ -138,7 +266,7 @@ class WhileStatement : public Statement
   		std::string l0, l1, l2;
   		l0 = Generator::make_label();
   		l1 = Generator::make_label();
-  		l2 = Generator::make_lable();
+  		l2 = Generator::make_label();
 
   		ss << ": " << l2 << '\n';
   		ss << bool_expr->gencode();
@@ -188,8 +316,8 @@ class IfStatement : public Statement
   	virtual std:string gencode() {
   		std::stringstream ss;
   		std::string l0, l1;
-  		l0 = Generator::make_label
-  		l1 = Generator::make_label
+  		l0 = Generator::make_label();
+  		l1 = Generator::make_label();
 
   		ss << bool_expr->gencode();
   		ss << "?:= " << l0 << ", " << bool_expr->ret_var << '\n';
@@ -273,3 +401,62 @@ class DefineStatement : public Statement
     std::string name;
     Expr *expr = nullptr;
 };
+
+
+class AssignStatement : public Statement
+{
+public:
+	AssignStatement(std::string name) : name(name) {}
+	virtual std::string gencode()
+	{
+		std::stringstream ss;
+
+
+	}
+};
+
+class ReturnStatement : public Statement
+{
+	//return_stmt -> RETURN exp\n
+public:
+	ReturnStatement(Expr *src) : src(src){}
+	virtual std::string gencode()
+	{
+		std::stringstream ss;
+		ss << "ret" << src->ret_var() << "\n";
+		return ss.str();
+	}
+
+protected:
+	Expr *src;	
+
+
+};
+
+class ReadStatement : public Statement
+{
+public:
+	ReadStatement(StatementList* readblock) : readblock(readblock){}
+	virtual std::string gencode()
+	{
+		std::stringstream ss;
+		ss << ".< " << readblock->gencode() << "\n";
+		return ss.str();
+	}
+protected:
+	StatementList *readblock;
+};
+
+class WriteStatement : public Statement
+{
+};
+
+class ContStatement : public Statement
+{
+
+};
+
+
+
+
+
