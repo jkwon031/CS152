@@ -123,7 +123,7 @@ protected:
 	ExprList *f_param;
 };
 
-class FunctionList : public Function
+class FunctionList : public ASTNode
 {
 public:
 	FunctionList(){}
@@ -179,7 +179,7 @@ class Expr : public ASTNode
     std::string op;
 };
 
-class ExprList : Expr
+class ExprList : ASTNode
 {
 public:
 	ExprList(){}
