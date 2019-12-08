@@ -125,12 +125,27 @@ protected:
 
 class FunctionList : public Function
 {
+public:
+	FunctionList(){}
+	virtual ~FunctionList()
+	{
+		for(auto f, func_list){
+			delete f;
+		}
+	}
+	void append(Function *f){func_list.push_back(f);}
 
-
-
+	virtual std::string gencode()
+	{
+		std::stringstream ss;
+		for(auto f : func_list){
+			ss << f->gencode(); 
+		}
+		return ss.str();
+	}
 
 protected:
-	std::vector<Function*> 	
+	std::vector<Function*> func_list;
 
 } 
 
