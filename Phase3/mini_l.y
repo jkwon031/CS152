@@ -17,7 +17,14 @@
   double dval;
   int ival;
   char* sval;
+  Statement* stat;
+  StatementList* stat_list;
+  Expr* expr;
 }
+
+%type<stat_list> program statement_list
+%type<expr> exp
+%type<stat> 
 
 %error-verbose
 %start program
@@ -33,15 +40,15 @@
 
 
 %% 
-program:			functions		{ $$ = $1; root = $$/* printf("program -> epsilon\n");*/ }
+program:			functions		{ $$ = $1; root = $$; }
 				;
 
-functions:			function 			{ $$ = new FunctionsList(); $$->append($1); /* printf("prog_start -> function\n");*/ }
+functions:			function 			{ $$ = new FunctionsList(); $$->append($1); }
 				|	function functions	{ $$ = $2; $2->front($1); }
 				;
 
 function:		FUNC ident SEMICOLON params local body
-							{ $$ = new Function($2, $4, $5, $6); /* printf("function -> FUNC IDENT SEMICOLON params local body\n");*/ }
+							{ $$ = new Function($2, $4, $5, $6); }
 				;
 
 params:			BEG_PARAMS declarations END_PARAMS
@@ -52,8 +59,8 @@ local:			BEG_LOC declarations END_LOC
 									{/* printf("local -> BEG_LOC declarations END_LOC\n");*/ }
 				;
 
-body:			BEG_BOD s_statement END_BOD
-									{/* printf("body -> BEG_BOD s_statment END_BOD\n");*/ }
+body:			BEG_BOD p_statement /*s_statement*/ END_BOD
+									{/* printf("body -> BEG_BOD p_statement END_BOD\n");*/ }
 				;
 
 declarations:						{/* printf("declarations -> epsilon\n");*/ }
@@ -79,10 +86,10 @@ array:								{/* printf("array -> epsilon\n");*/ }
 									{/* printf("array -> ARR BEG_ARR NUMBER END_ARR OF\n");*/ }
 				;
 
-s_statement:							{/* printf("s_statment -> epsilon\n"); */}
+/*s_statement:							{/* printf("s_statment -> epsilon\n"); */}
 				|	p_statement		{ $$ = $1; }
 				;
-
+*/
 p_statement:		statement SEMICOLON	{/* printf("p_statement -> statement SEMICOLON\n");*/ }
 				|	statement SEMICOLON p_statement
 									{/* printf("p_statement -> statement SEMICOLON p_statement\n");*/ }
@@ -92,10 +99,10 @@ statement:		assign_stmt		{/* printf("statement -> var ASSIGN exp\n"); */}
 				|	if_stmt			{ $$ = $1; }
 				|	while_stmt		{ $$ = $1; }
 				|	do_while_stmt	{ $$ = $1; }
-				|	read_stmt		{/* printf("statement -> read_stmt\n");*/ }
-				|	write_stmt		{/* printf("statement -> write_stmt\n"); */}
-				|	cont_stmt		{/* printf("statment -> cont_stmt\n"); */}
-				|	return_stmt		{/* printf("statement -> return_stmt\n"); */}
+				|	read_stmt		{ $$ = $1; }
+				|	write_stmt		{ $$ = $1; }
+				|	cont_stmt		{ $$ = $1; }
+				|	return_stmt		{ $$ = $1; }
 				;
 
 assign_stmt:	var ASSIGN exp 		{/* printf("assign_stmt -> var ASSIGN exp\n");*/ }
@@ -112,13 +119,13 @@ while_stmt:		WHILE bool_exp BEG_LOOP p_statement END_LOOP
 				;
 
 do_while_stmt:	DO BEG_LOOP p_statement END_LOOP WHILE bool_exp
-									{ $$ = new DoWhileStatement($2, $5); }
+									{ $$ = new DoWhileStatement($3, $6); }
 				;
 
-read_stmt:		READ c_var			{/* printf("read_stmt -> READ c_var\n");*/ }
+read_stmt:		READ c_var			{ $$ = new ReadStatement($2); }
 				;
 
-write_stmt:		WRITE c_var			{/* printf("write_stmt -> WRITE c_var\n");*/ }
+write_stmt:		WRITE c_var			{ $$ = new WriteStatment($2); }
 				;
 
 cont_stmt:		CONT 				{/* printf("cont_stmt -> CONT\n");*/ }
@@ -154,14 +161,14 @@ comp:			EQ				{/* printf("comp -> EQ\n");*/ }
 				;
 
 exp:			m_exp			{ /*printf("exp -> m_exp\n");*/ }
-				|	m_exp PLUS exp	{ /*printf("exp -> m_exp PLUS exp\n");*/ }
-				|	m_exp MINUS exp {/* printf("exp -> m_exp MINUS exp\n");*/ }
+				|	m_exp PLUS exp	{ $$ = new Expr($1, "+", $3); }
+				|	m_exp MINUS exp { $$ = new Expr($1, "-", $3); }
 				;
 
 m_exp:			term			{/* printf("m_exp -> term\n");*/ }
-				|	term MULT m_exp {/* printf("m_exp -> term MULT m_exp\n");*/ }
-				|	term DIV m_exp {/* printf("m_exp -> term DIV m_exp\n");*/ }
-				|	term MOD m_exp {/* printf("m_exp -> term MOD m_exp\n"); */}
+				|	term MULT m_exp { $$ = new Expr($1, "*", $3); }
+				|	term DIV m_exp { $$ = new Expr($1, "/", $3); }
+				|	term MOD m_exp { $$ = new Expr($1, "%", $3); }
 				;
 
 c_exp:			exp 			{/* printf("c_exp -> exp\n");*/ }
