@@ -147,7 +147,7 @@ public:
 protected:
 	std::vector<Function*> func_list;
 
-} 
+};
 
 
 
@@ -199,7 +199,7 @@ public:
 protected:
 	std::vector<Expr *> expr_list;
 
-}
+};
 
 class ExprID : public Expr
 {
@@ -505,3 +505,13 @@ protected:
 	Var_Arr *arr;
 	Expr *index;
 }; 
+
+class NotOperation : public Expr
+{
+	NotOperation()
+
+
+protected:
+	Expr *expr;
+
+};
