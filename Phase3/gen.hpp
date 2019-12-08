@@ -65,7 +65,7 @@ public:
 protected:
 	std::vector<Variable *> var_vec;
 
-}
+};
 
 class Var_Id : public Variable
 {
@@ -80,7 +80,7 @@ public:
 
 protected:
 	std::string name;
-}
+};
 
 class Var_Arr : public Variable
 {
@@ -99,7 +99,7 @@ public:
 protected:
 	std::string name;
 	Expr* index;
-}
+};
 
 class Function : public ASTNode
 {
@@ -121,7 +121,18 @@ protected:
 	Function(){}
 	Var_Id func;
 	ExprList *f_param;
-}; 
+};
+
+class FunctionList : public Function
+{
+
+
+
+
+protected:
+	std::vector<Function*> 	
+
+} 
 
 
 
@@ -402,19 +413,6 @@ class DefineStatement : public Statement
     Expr *expr = nullptr;
 };
 
-
-class AssignStatement : public Statement
-{
-public:
-	AssignStatement(std::string name) : name(name) {}
-	virtual std::string gencode()
-	{
-		std::stringstream ss;
-
-
-	}
-};
-
 class ReturnStatement : public Statement
 {
 	//return_stmt -> RETURN exp\n
@@ -436,7 +434,7 @@ protected:
 class ReadStatement : public Statement
 {
 public:
-	ReadStatement(StatementList* readblock) : readblock(readblock){}
+	ReadStatement(VarList* readblock) : readblock(readblock){}
 	virtual std::string gencode()
 	{
 		std::stringstream ss;
@@ -444,19 +442,51 @@ public:
 		return ss.str();
 	}
 protected:
-	StatementList *readblock;
+	VarList *readblock;
 };
+
+class ReadArray : public Statement
+{
+public:
+	ReadArray(Var_Arr* arr, Expr* index)
+	{
+		std::stringstream ss;
+		ss << ".[]< " arr->gencode() << ", " << index << "\n";
+		return ss.str();
+	}
+
+protected:
+	Var_Arr *arr;
+	Expr *index;
+};
+
 
 class WriteStatement : public Statement
 {
+public:
+	WriteStatement(VarList* writeblock) : writeblock(writeblock){}
+	virtual std::string gencode()
+	{
+		std::stringstream ss;
+		ss << ".> " << writeblock->gencode() << "\n";
+		return ss.str();
+	}
+
+protected:
+	VarList *writeblock;
 };
 
-class ContStatement : public Statement
+class WriteArray : public Statement
 {
+	WriteArray(Var_Arr* arr, Expr* index) : arr(arr), index(index){}
+	virtual std::string gencode()
+	{
+		virtual std::stringstream ss;
+		ss << ".[]> " << arr->gencode() << ", " << index << "\n"; 
+		return ss.str();
+	}
 
-};
-
-
-
-
-
+protected:
+	Var_Arr *arr;
+	Expr *index;
+}; 
