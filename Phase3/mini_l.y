@@ -46,8 +46,8 @@
 program:			functions		{ $$ = $1; root = $$; }
 				;
 
-function_list:		function 			{ $$ = new FunctionList(); $$->append($1); $$->front($1); }
-				|	function function_list	{ $$ = $2; $2->append($1);  $2->front($1); }
+function_list:		function 			{ $$ = new FunctionList(); $$->front($1); }
+				|	function function_list	{ $$ = $2; $2->front($1); }
 				;
 
 function:		FUNC IDENT SEMICOLON BEG_PARAMS declarations END_PARAMS BEG_LOC declarations END_LOC BEG_BOD statement_list END_BOD
