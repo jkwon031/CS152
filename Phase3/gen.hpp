@@ -37,12 +37,33 @@ class ASTNode
     virtual std::string gencode() = 0;
 };
 
+class Declaration : public ASTNode
+{
+public:
+	Declaration(std::string ident, std::int integer) : ident(ident), integer(integer){}
+	virtual std::string gencode()
+	{
+		std::stringstream ss;
+		ss << ident << " : "
+		return ss.str();
+	}
+
+
+protected:
+std::string ident;
+std::int integer;
+ExprArray* arr;
+};
+
+//class DeclarationList
+
+
 class Variable : public ASTNode
 {
 
 };
 
-class Varlist : public ASTnode
+class VarList : public ASTnode
 {
 public:
 	VarList(){}
@@ -101,11 +122,21 @@ public:
 protected:
 	std::string name;
 	Expr* index;
+
 };
 
 
 class Function : public ASTNode
 {
+public:
+	Function()
+
+protected:
+//param local body	
+std::string ident;
+DeclarationList* param;
+DeclarationList* local;
+StatementList* body;
 
 };
 
@@ -129,6 +160,23 @@ protected:
 	FunctionCall(){}
 	Var_Id func;
 	ExprList *f_param;
+};
+
+class FunctionReturn : public ASTNode
+{
+public:
+	ReturnStatement(Function *func) : func(func){}
+	virtual std::string gencode()
+	{
+		std::stringstream ss;
+		ss << "ret" << Function->gencode() << "\n";
+		return ss.str();
+	}
+
+protected:
+	Function* func;	
+
+
 };
 
 class FunctionList : public ASTNode
@@ -518,12 +566,29 @@ protected:
 	Expr *index;
 }; 
 
-class NotOperation : public Expr
-{
-	NotOperation()
-
+class AssignStatement : public Statement{
+public:
+	AssignStatement(VarList *dst, ExprList *src) : dst(dst), src(src){}
+	std::string gencode()
+	{
+		virtual std::stringstream ss;
+		ss << "= " << dst << ", " << src << "\n";
+		return ss.str();
+	}
 
 protected:
-	Expr *expr;
+	VarList* dst;
+	ExprList* src;
+}
 
-};
+
+
+// class NotOperation : public Expr
+// {
+// 	NotOperation()
+
+
+// protected:
+// 	Expr *expr;
+
+// };
