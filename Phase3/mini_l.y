@@ -17,14 +17,17 @@
   double dval;
   int ival;
   char* sval;
+  Function* func;
+  FunctionList*	func_list;
   Statement* stat;
   StatementList* stat_list;
   Expr* expr;
 }
 
-%type<stat_list> program statement_list
+%type<func_list> program function_list
+%type<stat_list> statement_list
 %type<expr> exp
-%type<stat> 
+%type<stat> statement
 
 %error-verbose
 %start program
@@ -43,24 +46,12 @@
 program:			functions		{ $$ = $1; root = $$; }
 				;
 
-functions:			function 			{ $$ = new FunctionsList(); $$->append($1); }
-				|	function functions	{ $$ = $2; $2->front($1); }
+function_list:		function 			{ $$ = new FunctionsList(); $$->append($1); }
+				|	function function_list	{ $$ = $2; $2->front($1); }
 				;
 
-function:		FUNC ident SEMICOLON params local body
-							{ $$ = new Function($2, $4, $5, $6); }
-				;
-
-params:			BEG_PARAMS declarations END_PARAMS
-							{/* printf("params -> BEG_PARAMS declarations END_PARAMS\n");*/ }
-				;
-
-local:			BEG_LOC declarations END_LOC
-									{/* printf("local -> BEG_LOC declarations END_LOC\n");*/ }
-				;
-
-body:			BEG_BOD p_statement /*s_statement*/ END_BOD
-									{/* printf("body -> BEG_BOD p_statement END_BOD\n");*/ }
+function:		FUNC IDENT SEMICOLON BEG_PARAMS declarations END_PARAMS BEG_LOC declarations END_LOC BEG_BOD p_statement END_BOD
+							{ $$ = new DefineFunction($2, $5, $8, $11); }
 				;
 
 declarations:						{/* printf("declarations -> epsilon\n");*/ }
@@ -68,28 +59,14 @@ declarations:						{/* printf("declarations -> epsilon\n");*/ }
 							{ $$ = new DeclarationsList(); $$->append(/*printf("declarations -> declaration SEMICOLON declarations\n");*/ }
 				;
 
-declaration: 	d_ident COLON array INT
+declaration: 	IDENT COMMA declaration
+									{}
+				|	IDENT COLON INT
+									{}
+				|	IDENT COLON ARR BEG_ARR NUMBER END_ARR OF INT
 									{/* printf("declaration -> d_ident COLON array INT\n"); */}
-				| declaration d_ident
 				;
 
-ident:			IDENT 				{/* printf("ident -> IDENT %s\n", $1);*/ }
-				;
-
-d_ident:		ident
-				|	ident COMMA d_ident
-									{/* printf("d_ident -> ident COMMA d_ident\n");*/ }
-				;
-
-array:								{/* printf("array -> epsilon\n");*/ }
-				|	ARR BEG_ARR NUMBER END_ARR OF
-									{/* printf("array -> ARR BEG_ARR NUMBER END_ARR OF\n");*/ }
-				;
-
-/*s_statement:							{/* printf("s_statment -> epsilon\n"); */}
-				|	p_statement		{ $$ = $1; }
-				;
-*/
 p_statement:		statement SEMICOLON	{/* printf("p_statement -> statement SEMICOLON\n");*/ }
 				|	statement SEMICOLON p_statement
 									{/* printf("p_statement -> statement SEMICOLON p_statement\n");*/ }
@@ -176,8 +153,8 @@ c_exp:			exp 			{/* printf("c_exp -> exp\n");*/ }
 				;
 
 term:			um_term			{/* printf("term -> um_term\n");*/ }
-				|	ident L_PAREN R_PAREN	{/* printf("term -> ident L_PAREN R_PAREN\n");*/ }
-				|	ident L_PAREN c_exp	R_PAREN	{/* printf("term -> ident L_PAREN c_exp R_PAREN\n");*/ }
+				|	IDENT L_PAREN R_PAREN	{/* printf("term -> ident L_PAREN R_PAREN\n");*/ }
+				|	IDENT L_PAREN c_exp	R_PAREN	{/* printf("term -> ident L_PAREN c_exp R_PAREN\n");*/ }
 				;
 
 um_term:			MINUS t_term %prec UMINUS
@@ -190,8 +167,8 @@ t_term:			var				{/* printf("t_term -> var\n");*/ }
 				|	L_PAREN exp R_PAREN	{/* printf("t_term -> L_PAREN exp R_PAREN\n");*/ }
 				;
 
-var:				ident 			{ /*printf("var -> ident\n");*/ }
-				|	ident BEG_ARR exp END_ARR
+var:				IDENT 			{ /*printf("var -> ident\n");*/ }
+				|	IDENT BEG_ARR exp END_ARR
 								{ /*printf("var -> ident BEG_ARR exp END_ARR\n");*/ }
 				;
 
