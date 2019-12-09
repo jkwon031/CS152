@@ -103,10 +103,16 @@ protected:
 	Expr* index;
 };
 
+
 class Function : public ASTNode
 {
+
+};
+
+class FunctionCall : public Function
+{
 public:
-	Function(Var_Id func, ExprList * f_param) : func(func), f_param(f_param){}
+	FunctionCall(Var_Id func, ExprList * f_param) : func(func), f_param(f_param){}
 	virtual std::string gencode(){
 		std::stringstream ss;
 		std::string temp = Generator::make_var();
@@ -120,7 +126,7 @@ public:
 	}
 
 protected:
-	Function(){}
+	FunctionCall(){}
 	Var_Id func;
 	ExprList *f_param;
 };
