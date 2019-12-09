@@ -50,30 +50,28 @@ function_list:		function 			{ $$ = new FunctionsList(); $$->append($1); }
 				|	function function_list	{ $$ = $2; $2->front($1); }
 				;
 
-function:		FUNC IDENT SEMICOLON BEG_PARAMS declarations END_PARAMS BEG_LOC declarations END_LOC BEG_BOD p_statement END_BOD
+function:		FUNC IDENT SEMICOLON BEG_PARAMS declarations END_PARAMS BEG_LOC declarations END_LOC BEG_BOD statement_list END_BOD
 							{ $$ = new DefineFunction($2, $5, $8, $11); }
 				;
 
-declarations:		declaration SEMICOLON
-							{ $$ = new DeclarationsList(); $$->append($1); }
+declarations:						{ }
 				|	declaration SEMICOLON declarations
-							{ $$ = $3; $3->front($1); }
+							{ $$ = new DeclarationList(); }
 				;
 
 declaration: 	IDENT COMMA declaration
-									{$$ = new Declaration($1, $3); }
+									{}
 				|	IDENT COLON INT
-									{$$ = new Declaration($1); }
+									{}
 				|	IDENT COLON ARR BEG_ARR NUMBER END_ARR OF INT
-									{$$ = new Declaration($1, $5); }
+									{/* printf("declaration -> d_ident COLON array INT\n"); */}
 				;
 
-p_statement:		statement SEMICOLON	{$$ = new StatementList(); $$->append($1); }
-				|	statement SEMICOLON p_statement
-									{$$ = $3; $3->front($1); }
+statement_list:		statement SEMICOLON	{ $$ = new StatementList($1); }
+				|	statement SEMICOLON statement_list {$$ =  $3; $$->append($1); $$->front($1);}
 				;
 
-statement:		assign_stmt		{ $$ = $1; }
+statement:		assign_stmt		{/* printf("statement -> var ASSIGN exp\n"); */}
 				|	if_stmt			{ $$ = $1; }
 				|	while_stmt		{ $$ = $1; }
 				|	do_while_stmt	{ $$ = $1; }
@@ -83,27 +81,27 @@ statement:		assign_stmt		{ $$ = $1; }
 				|	return_stmt		{ $$ = $1; }
 				;
 
-assign_stmt:	var ASSIGN exp 		{ $$ = new AssignStatement($1, $3); }
+assign_stmt:	var ASSIGN exp 		{$$ = new AssignStatement($1, $2)}
 				;					
 
-if_stmt:		IF bool_exp THEN p_statement END_IF 
+if_stmt:		IF bool_exp THEN statement_list END_IF 
 									{ $$ = new IfStatement($2, $4); }
-				|	IF bool_exp THEN p_statement ELSE p_statement END_IF
+				|	IF bool_exp THEN statement_list ELSE statement_list END_IF
 									{ $$ = new IfElseStatement($2, $4, $6); }
 				;
 
-while_stmt:		WHILE bool_exp BEG_LOOP p_statement END_LOOP
+while_stmt:		WHILE bool_exp BEG_LOOP statement_list END_LOOP
 									{ $$ = new WhileStatement($2, $4); }
 				;
 
-do_while_stmt:	DO BEG_LOOP p_statement END_LOOP WHILE bool_exp
+do_while_stmt:	DO BEG_LOOP statement_list END_LOOP WHILE bool_exp
 									{ $$ = new DoWhileStatement($3, $6); }
 				;
 
-read_stmt:		READ c_var			{ $$ = new ReadStatement($2); }
+read_stmt:		READ vars			{ $$ = new ReadStatement($2); }
 				;
 
-write_stmt:		WRITE c_var			{ $$ = new WriteStatment($2); }
+write_stmt:		WRITE vars			{ $$ = new WriteStatment($2); }
 				;
 
 cont_stmt:		CONT 				{/* printf("cont_stmt -> CONT\n");*/ }
@@ -112,30 +110,30 @@ cont_stmt:		CONT 				{/* printf("cont_stmt -> CONT\n");*/ }
 return_stmt:	RETURN exp				{/* printf("return_stmt -> RETURN exp\n");*/ }
 				;
 
-bool_exp:		r_and_exp 			{ $$ = $1; }
-				|	r_and_exp OR bool_exp	{ $$ = new Expr($1, "||", $3); }				
+bool_exp:		r_and_exp 			{/* printf("bool_exp -> r_and_exp\n");*/ }
+				|	r_and_exp OR bool_exp	{/* printf("bool_exp -> r_and_exp OR r_and_exp\n");*/ }				
 				;
 
-r_and_exp:		r_exp 				{ $$ = $1; }
-				|	r_exp AND r_and_exp 	{ $$ = new Expr($1, "&&", $3); }
+r_and_exp:		r_exp 				{/* printf("r_and_exp -> r_exp\n");*/ }
+				|	r_exp AND r_and_exp 	{/* printf("r_and_exp -> r_exp AND r_exp\n");*/ }
 				;
 
-r_exp: 			all_b_exp			{ $$ = $1; }
+r_exp: 			all_b_exp			{/* printf("r_exp -> all_b_exp\n");*/ }
 				|	NOT all_b_exp	{ /*printf("r_exp -> NOT all_b_exp\n");*/ }
 				;
 
-all_b_exp:		exp comp exp 		{ $$ = new Comparison($1, $2, $3); }
-				|	TRUE			{ $$ = "true"; }
-				|	FALSE			{ $$ = "false"; }
+all_b_exp:		exp comp exp 		{ /*printf("all_b_exp -> exp comp exp\n");*/ }
+				|	TRUE			{/* printf("all_b_exp -> TRUE\n");*/ }
+				|	FALSE			{/* printf("all_b_exp -> FALSE\n");*/ }
 				|	L_PAREN bool_exp R_PAREN	{/* printf("all_b_exp -> L_PAREN bool_exp R_PAREN\n");*/ }
 				;
 
-comp:			EQ				{ $$ = "="; }
-				|	NEQ			{ $$ = "!="; }
-				|	LT 			{ $$ = "<"; }
-				|	GT 			{ $$ = ">"; }
-				|	LTE 		{ $$ = "<="; }
-				|	GTE 		{ $$ = ">="; }
+comp:			EQ				{$$ = "==";}
+				|	NEQ			{$$ = "!=";}
+				|	LT 			{$$ = "<";}
+				|	GT 			{$$ = ">";}
+				|	LTE 		{$$ = "<=";}
+				|	GTE 		{$$ = ">=";}
 				;
 
 exp:			m_exp			{ $$ = $1; }
@@ -143,38 +141,39 @@ exp:			m_exp			{ $$ = $1; }
 				|	m_exp MINUS exp { $$ = new Expr($1, "-", $3); }
 				;
 
-m_exp:			term			{ $$ = $1; }
+m_exp:			term			{$$ = $1} }
 				|	term MULT m_exp { $$ = new Expr($1, "*", $3); }
 				|	term DIV m_exp { $$ = new Expr($1, "/", $3); }
 				|	term MOD m_exp { $$ = new Expr($1, "%", $3); }
 				;
 
-c_exp:			exp 			{ $$ = $1; }
-				|	exp COMMA c_exp	{ $$ = new Expr($1, ",", $3); }
+c_exp:			exp 			{$$ = new ExprList(); $$->append($1); $$->front($1);}
+				|	exp COMMA c_exp	{$$->append($1); $$->append($1); }
 				;
 
-term:			um_term			{ $$ = $1; }
-				|	IDENT L_PAREN R_PAREN	{ $$ = Function($1, NULL); }
-				|	IDENT L_PAREN c_exp	R_PAREN	{ $$ = Function($1, $3); }
+term:			um_term			{$$ = $1;}
+				|	IDENT L_PAREN R_PAREN	{//$$ = new FunctionCall();}
+				|	IDENT L_PAREN c_exp	R_PAREN	{/* printf("term -> ident L_PAREN c_exp R_PAREN\n");*/ }
 				;
 
 um_term:			MINUS t_term %prec UMINUS
-								{ }
-				|	t_term		{ $$ = $1; }
+								{//??}
+				|	t_term		{$$ = $1;}
 				;
 
-t_term:			var				{ $$ = $1; }
-				|	NUMBER		{ $$ = ExprNumber($1); }
-				|	L_PAREN exp R_PAREN	{/* printf("t_term -> L_PAREN exp R_PAREN\n");*/ }
+t_term:			var				{$$ = $1;}
+				|	NUMBER		{$$ = $1;}
+				|	L_PAREN exp R_PAREN	{/* printf();*/
+				 }
 				;
 
-var:				IDENT 			{ /*printf("var -> ident\n");*/ }
+var:				IDENT 			{$$ = new Variable($1);}
 				|	IDENT BEG_ARR exp END_ARR
-								{ /*printf("var -> ident BEG_ARR exp END_ARR\n");*/ }
+								{ $$ = new Var_Arr($1, $2); }
 				;
 
-c_var:			var 			{ $$ = $1; }
-				|	var COMMA c_var	{/* printf("c_var -> var COMMA c_var\n");*/ }
+vars:			var 			{$$ = new VarList(); VarList.append($1); VarList.front($1); }
+				|	var COMMA vars	{ $$ =  $3; $$ -> append($1); $$->front($1);}
 
 %%
 

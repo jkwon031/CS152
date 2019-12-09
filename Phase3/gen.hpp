@@ -40,22 +40,54 @@ class ASTNode
 class Declaration : public ASTNode
 {
 public:
-	Declaration(std::string ident, std::int integer) : ident(ident), integer(integer){}
+	Declaration(std::string name){id_list.push_back(name)}	
+	
+	Declaration(std::string ident, int array_sz) : array_sz(array_sz){id_list.push_back(name)}
+	
+	void front(std::string s) { id_list.insert(id_list.begin(), name); }
+
 	virtual std::string gencode()
 	{
 		std::stringstream ss;
-		ss << ident << " : "
+		for(auto name : id_list){
+			if(array_sz < 0){
+				ss << ". " <<  ident << "\n";
+			}
+			else{
+				ss << ".[] " << ident << ", " << array_sz << "\n";
+			}
+		}
 		return ss.str();
 	}
 
 
 protected:
-std::string ident;
-std::int integer;
-ExprArray* arr;
+std::vector<string> id_list;
+std::int array_sz;
+
 };
 
-//class DeclarationList
+class DeclarationList : public ASTnode
+{
+	DeclarationList(){}
+	
+	void append(Declaration *d) {Dec_List.push_back();}
+
+    void front(Declaration *d) { var_vec.insert(Dec_List.begin(), d);}
+
+	virtual std::string gencode() {
+		std::stringstream ss;
+		for(auto d : Dec_List) {
+			ss << d -> gencode();
+		}
+		return ss.str();
+	}
+
+protected:
+	std::vector<Declaration*> Dec_List;
+
+
+};
 
 
 class Variable : public ASTNode
@@ -75,7 +107,7 @@ public:
 	}
 	void append(Variable *v) {var_vec.push_back(v);}
 
-    void front(Variable *v) { stat_vec.insert(v); }
+    void front(Variable *v) { var_vec.insert(var_vec.begin(), v); }
 
 	virtual std::string gencode() {
 		std::stringstream ss;
@@ -108,7 +140,7 @@ protected:
 class Var_Arr : public Variable
 {
 public:
-	Var_Arr(std::string name, Expr* exprIndex) : name(name), index(index) {}
+	Var_Arr(std::string name, Expr* exprIndex) : name(name), index(exprindex) {}
 
 	virtual std::string gencode()
 	{
@@ -129,7 +161,15 @@ protected:
 class Function : public ASTNode
 {
 public:
-	Function()
+	Function(std::string ident, DeclarationList *param, DeclarationList *local, StatementList* body) : param(param), local(local), body(body){}
+	std::string gencode(){
+		std::stringstream ss;
+		ss << "function " << ident << "; " << "\n" 
+		ss << param->gencode() << "\n";
+		ss << local->gencode() << "\n";
+		ss << body->gencode() << "\n";
+		return ss.str();
+	}
 
 protected:
 //param local body	
@@ -490,7 +530,7 @@ class DefineStatement : public Statement
 
 class ReturnStatement : public Statement
 {
-	//return_stmt -> RETURN exp\n
+  
 public:
 	ReturnStatement(Expr *src) : src(src){}
 	virtual std::string gencode()
@@ -579,7 +619,10 @@ public:
 protected:
 	VarList* dst;
 	ExprList* src;
-}
+};
+
+
+
 
 
 
