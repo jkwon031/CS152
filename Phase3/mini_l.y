@@ -46,8 +46,8 @@
 program:			functions		{ $$ = $1; root = $$; }
 				;
 
-function_list:		function 			{ $$ = new FunctionsList(); $$->append($1); }
-				|	function function_list	{ $$ = $2; $2->front($1); }
+function_list:		function 			{ $$ = new FunctionList(); $$->append($1); $$->front($1); }
+				|	function function_list	{ $$ = $2; $2->append($1);  $2->front($1); }
 				;
 
 function:		FUNC IDENT SEMICOLON BEG_PARAMS declarations END_PARAMS BEG_LOC declarations END_LOC BEG_BOD statement_list END_BOD
@@ -56,22 +56,24 @@ function:		FUNC IDENT SEMICOLON BEG_PARAMS declarations END_PARAMS BEG_LOC decla
 
 declarations:						{ }
 				|	declaration SEMICOLON declarations
-							{ $$ = new DeclarationList(); }
+							{ $$ = $3; $$->front($1); }
 				;
 
 declaration: 	IDENT COMMA declaration
-									{}
+									{$$ = $3; $$->front($1);}
 				|	IDENT COLON INT
-									{}
+									{$$ = new Declaration($1);}
 				|	IDENT COLON ARR BEG_ARR NUMBER END_ARR OF INT
-									{/* printf("declaration -> d_ident COLON array INT\n"); */}
+									{/* printf("declaration -> d_ident COLON array INT\n"); */
+									$$ = new Declaration($1, $8);}
 				;
 
 statement_list:		statement SEMICOLON	{ $$ = new StatementList($1); }
-				|	statement SEMICOLON statement_list {$$ =  $3; $$->append($1); $$->front($1);}
+				|	statement SEMICOLON statement_list {$$ =  $3; $$->front($1);}
 				;
 
-statement:		assign_stmt		{/* printf("statement -> var ASSIGN exp\n"); */}
+statement:		assign_stmt		{/* printf("statement -> var ASSIGN exp\n"); */
+}
 				|	if_stmt			{ $$ = $1; }
 				|	while_stmt		{ $$ = $1; }
 				|	do_while_stmt	{ $$ = $1; }
@@ -148,11 +150,11 @@ m_exp:			term			{$$ = $1} }
 				;
 
 c_exp:			exp 			{$$ = new ExprList(); $$->append($1); $$->front($1);}
-				|	exp COMMA c_exp	{$$->append($1); $$->append($1); }
+				|	exp COMMA c_exp	{$$->append($1); $$->front($1); }
 				;
 
 term:			um_term			{$$ = $1;}
-				|	IDENT L_PAREN R_PAREN	{//$$ = new FunctionCall();}
+				|	IDENT L_PAREN R_PAREN	{/*$$ = new FunctionCall();*/}
 				|	IDENT L_PAREN c_exp	R_PAREN	{/* printf("term -> ident L_PAREN c_exp R_PAREN\n");*/ }
 				;
 

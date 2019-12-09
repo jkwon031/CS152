@@ -71,7 +71,7 @@ class DeclarationList : public ASTnode
 {
 	DeclarationList(){}
 	
-	void append(Declaration *d) {Dec_List.push_back();}
+	//void append(Declaration *d) {Dec_List.push_back();}
 
     void front(Declaration *d) { var_vec.insert(Dec_List.begin(), d);}
 
@@ -105,7 +105,7 @@ public:
 			delete v;
 		}
 	}
-	void append(Variable *v) {var_vec.push_back(v);}
+	//void append(Variable *v) {var_vec.push_back(v);}
 
     void front(Variable *v) { var_vec.insert(var_vec.begin(), v); }
 
@@ -229,9 +229,9 @@ public:
 			delete f;
 		}
 	}
-	void append(Function *f){func_list.push_back(f);}
+	//void append(Function *f){func_list.push_back(f);}
 
-    void front(Function *f) { stat_vec.insert(f); }
+  void front(Function* f) { func_list.insert(func_list.begin(), name); }
 
 	virtual std::string gencode()
 	{
@@ -285,9 +285,8 @@ public:
 	{
 		for(auto e : expr_list) {delete e;}
 	}
-	void append(Expr *e) {expr_list.push_back(e);}
+  void front(Expr* e) { expr_list.insert(expr_list.begin(), name); }
 
-    void front(Expr *e) { stat_vec.insert(e); }
 	virtual std::string gencode()
 	{
 		std::stringstream ss;
@@ -365,9 +364,8 @@ class StatementList : public ASTNode
             delete s;
         }
     }
-    void append(Statement *s) { stat_vec.push_back(s); }
+  void front(Statement* s) { id_list.insert(stat_vec.begin(), name); }
 
-    void front(Statement *s) { stat_vec.insert(s); }
 
     virtual std::string gencode() {
         std::stringstream ss;
@@ -530,7 +528,7 @@ class DefineStatement : public Statement
 
 class ReturnStatement : public Statement
 {
-  
+
 public:
 	ReturnStatement(Expr *src) : src(src){}
 	virtual std::string gencode()
@@ -609,16 +607,24 @@ protected:
 class AssignStatement : public Statement{
 public:
 	AssignStatement(VarList *dst, ExprList *src) : dst(dst), src(src){}
-	std::string gencode()
+	virtual std::string gencode()
 	{
-		virtual std::stringstream ss;
-		ss << "= " << dst << ", " << src << "\n";
+		std::stringstream ss;
+		ss << dst->gencode();
+    ss << src->gencode();
+    if(dst->ret_var.find(',') == std::string::npos){
+      ss << "= " << dst->ret_var << ", " << expr->ret_var << "\n";
+    }
+    else{
+      ss << "[]= " << dst->ret_var << ", " << expr->ret_var << "\n";
+    }
+
 		return ss.str();
 	}
 
 protected:
-	VarList* dst;
-	ExprList* src;
+	Variable* dst;
+	Expr* src;
 };
 
 
