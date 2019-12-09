@@ -54,25 +54,26 @@ function:		FUNC IDENT SEMICOLON BEG_PARAMS declarations END_PARAMS BEG_LOC decla
 							{ $$ = new DefineFunction($2, $5, $8, $11); }
 				;
 
-declarations:						{/* printf("declarations -> epsilon\n");*/ }
+declarations:		declaration SEMICOLON
+							{ $$ = new DeclarationsList(); $$->append($1); }
 				|	declaration SEMICOLON declarations
-							{ $$ = new DeclarationsList(); $$->append(/*printf("declarations -> declaration SEMICOLON declarations\n");*/ }
+							{ $$ = $3; $3->front($1); }
 				;
 
 declaration: 	IDENT COMMA declaration
-									{}
+									{$$ = new Declaration($1, $3); }
 				|	IDENT COLON INT
-									{}
+									{$$ = new Declaration($1); }
 				|	IDENT COLON ARR BEG_ARR NUMBER END_ARR OF INT
-									{/* printf("declaration -> d_ident COLON array INT\n"); */}
+									{$$ = new Declaration($1, $5); }
 				;
 
-p_statement:		statement SEMICOLON	{/* printf("p_statement -> statement SEMICOLON\n");*/ }
+p_statement:		statement SEMICOLON	{$$ = new StatementList(); $$->append($1); }
 				|	statement SEMICOLON p_statement
-									{/* printf("p_statement -> statement SEMICOLON p_statement\n");*/ }
+									{$$ = $3; $3->front($1); }
 				;
 
-statement:		assign_stmt		{/* printf("statement -> var ASSIGN exp\n"); */}
+statement:		assign_stmt		{ $$ = $1; }
 				|	if_stmt			{ $$ = $1; }
 				|	while_stmt		{ $$ = $1; }
 				|	do_while_stmt	{ $$ = $1; }
@@ -82,7 +83,7 @@ statement:		assign_stmt		{/* printf("statement -> var ASSIGN exp\n"); */}
 				|	return_stmt		{ $$ = $1; }
 				;
 
-assign_stmt:	var ASSIGN exp 		{/* printf("assign_stmt -> var ASSIGN exp\n");*/ }
+assign_stmt:	var ASSIGN exp 		{ $$ = new AssignStatement($1, $3); }
 				;					
 
 if_stmt:		IF bool_exp THEN p_statement END_IF 
@@ -111,59 +112,59 @@ cont_stmt:		CONT 				{/* printf("cont_stmt -> CONT\n");*/ }
 return_stmt:	RETURN exp				{/* printf("return_stmt -> RETURN exp\n");*/ }
 				;
 
-bool_exp:		r_and_exp 			{/* printf("bool_exp -> r_and_exp\n");*/ }
-				|	r_and_exp OR bool_exp	{/* printf("bool_exp -> r_and_exp OR r_and_exp\n");*/ }				
+bool_exp:		r_and_exp 			{ $$ = $1; }
+				|	r_and_exp OR bool_exp	{ $$ = new Expr($1, "||", $3); }				
 				;
 
-r_and_exp:		r_exp 				{/* printf("r_and_exp -> r_exp\n");*/ }
-				|	r_exp AND r_and_exp 	{/* printf("r_and_exp -> r_exp AND r_exp\n");*/ }
+r_and_exp:		r_exp 				{ $$ = $1; }
+				|	r_exp AND r_and_exp 	{ $$ = new Expr($1, "&&", $3); }
 				;
 
-r_exp: 			all_b_exp			{/* printf("r_exp -> all_b_exp\n");*/ }
+r_exp: 			all_b_exp			{ $$ = $1; }
 				|	NOT all_b_exp	{ /*printf("r_exp -> NOT all_b_exp\n");*/ }
 				;
 
-all_b_exp:		exp comp exp 		{ /*printf("all_b_exp -> exp comp exp\n");*/ }
-				|	TRUE			{/* printf("all_b_exp -> TRUE\n");*/ }
-				|	FALSE			{/* printf("all_b_exp -> FALSE\n");*/ }
+all_b_exp:		exp comp exp 		{ $$ = new Comparison($1, $2, $3); }
+				|	TRUE			{ $$ = "true"; }
+				|	FALSE			{ $$ = "false"; }
 				|	L_PAREN bool_exp R_PAREN	{/* printf("all_b_exp -> L_PAREN bool_exp R_PAREN\n");*/ }
 				;
 
-comp:			EQ				{/* printf("comp -> EQ\n");*/ }
-				|	NEQ			{/* printf("comp -> NEQ\n");*/ }
-				|	LT 			{/* printf("comp -> LT\n");*/ }
-				|	GT 			{ /*printf("comp -> GT\n");*/ }
-				|	LTE 		{/* printf("comp -> LTE\n");*/ }
-				|	GTE 		{ /*printf("comp -> GTE\n") ;*/}
+comp:			EQ				{ $$ = "="; }
+				|	NEQ			{ $$ = "!="; }
+				|	LT 			{ $$ = "<"; }
+				|	GT 			{ $$ = ">"; }
+				|	LTE 		{ $$ = "<="; }
+				|	GTE 		{ $$ = ">="; }
 				;
 
-exp:			m_exp			{ /*printf("exp -> m_exp\n");*/ }
+exp:			m_exp			{ $$ = $1; }
 				|	m_exp PLUS exp	{ $$ = new Expr($1, "+", $3); }
 				|	m_exp MINUS exp { $$ = new Expr($1, "-", $3); }
 				;
 
-m_exp:			term			{/* printf("m_exp -> term\n");*/ }
+m_exp:			term			{ $$ = $1; }
 				|	term MULT m_exp { $$ = new Expr($1, "*", $3); }
 				|	term DIV m_exp { $$ = new Expr($1, "/", $3); }
 				|	term MOD m_exp { $$ = new Expr($1, "%", $3); }
 				;
 
-c_exp:			exp 			{/* printf("c_exp -> exp\n");*/ }
-				|	exp COMMA c_exp	{/* printf("c_exp -> exp COMMA c_exp\n");*/ }
+c_exp:			exp 			{ $$ = $1; }
+				|	exp COMMA c_exp	{ $$ = new Expr($1, ",", $3); }
 				;
 
-term:			um_term			{/* printf("term -> um_term\n");*/ }
-				|	IDENT L_PAREN R_PAREN	{/* printf("term -> ident L_PAREN R_PAREN\n");*/ }
-				|	IDENT L_PAREN c_exp	R_PAREN	{/* printf("term -> ident L_PAREN c_exp R_PAREN\n");*/ }
+term:			um_term			{ $$ = $1; }
+				|	IDENT L_PAREN R_PAREN	{ $$ = Function($1, NULL); }
+				|	IDENT L_PAREN c_exp	R_PAREN	{ $$ = Function($1, $3); }
 				;
 
 um_term:			MINUS t_term %prec UMINUS
-								{/* printf("um_term -> MINUS t_term\n");*/ }
-				|	t_term		{/* printf("um_term -> t_term\n"); */}
+								{ }
+				|	t_term		{ $$ = $1; }
 				;
 
-t_term:			var				{/* printf("t_term -> var\n");*/ }
-				|	NUMBER		{/* printf("t_term -> NUMBER\n");*/ }
+t_term:			var				{ $$ = $1; }
+				|	NUMBER		{ $$ = ExprNumber($1); }
 				|	L_PAREN exp R_PAREN	{/* printf("t_term -> L_PAREN exp R_PAREN\n");*/ }
 				;
 
@@ -172,7 +173,7 @@ var:				IDENT 			{ /*printf("var -> ident\n");*/ }
 								{ /*printf("var -> ident BEG_ARR exp END_ARR\n");*/ }
 				;
 
-c_var:			var 			{/* printf("c_var -> var\n");*/ }
+c_var:			var 			{ $$ = $1; }
 				|	var COMMA c_var	{/* printf("c_var -> var COMMA c_var\n");*/ }
 
 %%
