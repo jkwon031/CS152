@@ -54,6 +54,8 @@ public:
 	}
 	void append(Variable *v) {var_vec.push_back(v);}
 
+    void front(Statement *v) { stat_vec.insert(v); }
+
 	virtual std::string gencode() {
 		std::stringstream ss;
 		for(auto v : var_vec) {
@@ -135,6 +137,8 @@ public:
 	}
 	void append(Function *f){func_list.push_back(f);}
 
+    void front(Statement *f) { stat_vec.insert(f); }
+
 	virtual std::string gencode()
 	{
 		std::stringstream ss;
@@ -188,6 +192,8 @@ public:
 		for(auto e : expr_list) {delete e;}
 	}
 	void append(Expr *e) {expr_list.push_back(e);}
+
+    void front(Statement *e) { stat_vec.insert(e); }
 	virtual std::string gencode()
 	{
 		std::stringstream ss;
