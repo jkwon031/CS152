@@ -63,7 +63,7 @@ public:
 
 protected:
 std::vector<string> id_list;
-std::int array_sz;
+std::int array_sz = -1;
 
 };
 

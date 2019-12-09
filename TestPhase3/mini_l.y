@@ -26,7 +26,7 @@ void yyerror(const char* s);
 %token T_IF T_ELSE T_INT T_WHILE T_DO T_BEGL T_ENDL
 %token T_LTE T_GTE T_EQ T_NE T_OR T_AND
 
-%right '='
+%right ':='
 %left T_OR
 %left T_AND
 %left T_LTE T_GTE T_EQ T_NE '<' '>'

@@ -21,13 +21,23 @@
   FunctionList*	func_list;
   Statement* stat;
   StatementList* stat_list;
+  Declaration* dec;
+  DeclarationList* decs;
+  Variable* var;
+  VarList* vars;
+
   Expr* expr;
 }
 
 %type<func_list> program function_list
 %type<stat_list> statement_list
-%type<expr> exp
-%type<stat> statement
+%type<decs> declarations
+%type<vars> vars
+%type<var> var
+%type<expr> exp bool_exp r_and_exp r_exp all_b_exp comp	m_exp c_exp
+%type<func> function
+%type<stat> statement assign_stmt if_stmt while_stmt do_while_stmt read_stmt write_stmt return_stmt
+%type<dec> declaration
 
 %error-verbose
 %start program
@@ -43,7 +53,7 @@
 
 
 %% 
-program:			functions		{ $$ = $1; root = $$; }
+program:			function_list		{ $$ = $1; root = $$; }
 				;
 
 function_list:		function 			{ $$ = new FunctionList(); $$->front($1); }
@@ -72,8 +82,7 @@ statement_list:		statement SEMICOLON	{ $$ = new StatementList($1); }
 				|	statement SEMICOLON statement_list {$$ =  $3; $$->front($1);}
 				;
 
-statement:		assign_stmt		{ $$ = $1; }; */
-}
+statement:		assign_stmt		{ $$ = $1; }
 				|	if_stmt			{ $$ = $1; }
 				|	while_stmt		{ $$ = $1; }
 				|	do_while_stmt	{ $$ = $1; }
@@ -143,7 +152,7 @@ exp:			m_exp			{ $$ = $1; }
 				|	m_exp MINUS exp { $$ = new Expr($1, "-", $3); }
 				;
 
-m_exp:			term			{$$ = $1} }
+m_exp:			term			{$$ = $1;} 
 				|	term MULT m_exp { $$ = new Expr($1, "*", $3); }
 				|	term DIV m_exp { $$ = new Expr($1, "/", $3); }
 				|	term MOD m_exp { $$ = new Expr($1, "%", $3); }
@@ -159,7 +168,7 @@ term:			um_term			{$$ = $1;}
 				;
 
 um_term:			MINUS t_term %prec UMINUS
-								{//??}
+								{}
 				|	t_term		{$$ = $1;}
 				;
 
@@ -179,6 +188,8 @@ vars:			var 			{$$ = new VarList(); VarList.append($1); VarList.front($1); }
 
 %%
 
+ASTNode* root;
+
 int main(int argc, char **argv) {
    if (argc > 1) {
       yyin = fopen(argv[1], "r");
@@ -187,6 +198,8 @@ int main(int argc, char **argv) {
       }//end if
    }//end if
    yyparse(); // Calls yylex() for tokens.
+   std::string mil = root->gencode();
+   std::cout << mil;
    return 0;
 }
 
