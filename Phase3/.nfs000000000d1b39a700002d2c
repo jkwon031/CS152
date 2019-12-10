@@ -40,9 +40,9 @@ class ASTNode
 class Declaration : public ASTNode
 {
 public:
-	Declaration(std::string name){id_list.push_back(name);}	
+	Declaration(std::string name){id_list.push_back(name)}	
 	
-	Declaration(std::string ident, int array_sz) : array_sz(array_sz){id_list.push_back(name);}
+	Declaration(std::string ident, int array_sz) : array_sz(array_sz){id_list.push_back(name)}
 	
 	void front(std::string s) { id_list.insert(id_list.begin(), name); }
 
@@ -62,19 +62,18 @@ public:
 
 
 protected:
-std::vector<std::string> id_list;
-int array_sz = -1;
-std::string name, ident;
+std::vector<string> id_list;
+std::int array_sz = -1;
+
 };
 
 class DeclarationList : public ASTnode
 {
-public:
 	DeclarationList(){}
 	
 	//void append(Declaration *d) {Dec_List.push_back();}
 
-    void front(Declaration *d) { Dec_List.insert(Dec_List.begin(), d);}
+    void front(Declaration *d) { var_vec.insert(Dec_List.begin(), d);}
 
 	virtual std::string gencode() {
 		std::stringstream ss;
@@ -93,9 +92,10 @@ protected:
 
 class Variable : public ASTNode
 {
+
 };
 
-class VarList : public ASTNode
+class VarList : public ASTnode
 {
 public:
 	VarList(){}
